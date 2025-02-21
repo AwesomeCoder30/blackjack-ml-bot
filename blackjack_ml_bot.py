@@ -1,17 +1,29 @@
+import json
 import random
 import matplotlib.pyplot as plt # type: ignore
 
 class BlackjackBot:
-    def __init__(self):
-        """Initializes the Blackjack bot with enhanced Q-learning capabilities."""
-        self.card_values = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11}
+    def __init__(self, config_file="config.json"):
+        """Initializes the Blackjack bot and loads config settings."""
+        with open(config_file, "r") as f:
+            config = json.load(f)
+
+        # Load config values
+        self.learning_rate = config["learning_rate"]
+        self.discount_factor = config["discount_factor"]
+        self.epsilon = config["epsilon_start"]
+        self.epsilon_decay = config["epsilon_decay"]
+        self.min_epsilon = config["min_epsilon"]
+        self.training_episodes = config["training_episodes"]
+        self.evaluation_games = config["evaluation_games"]
+
+        self.card_values = {
+            '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+            '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11
+        }
+
         self.deck = []
         self.q_table = {}
-        self.learning_rate = 0.05
-        self.discount_factor = 0.95
-        self.epsilon = 1.0
-        self.epsilon_decay = 0.9995
-        self.min_epsilon = 0.01
         self.training_progress = []
         self.shuffle_deck()
 
