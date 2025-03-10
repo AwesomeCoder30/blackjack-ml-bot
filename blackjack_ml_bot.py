@@ -1,14 +1,15 @@
 import json
 import random
 import matplotlib.pyplot as plt # type: ignore
+import pandas as pd # type: ignore
+import os
 
 class BlackjackBot:
-    def __init__(self, config_file="config.json"):
+    def __init__(self, config_file="config.json", results_file="blackjack_results.csv", q_table_file="q_table.json"):
         """Initializes the Blackjack bot and loads config settings."""
         with open(config_file, "r") as f:
             config = json.load(f)
 
-        # Load config values
         self.learning_rate = config["learning_rate"]
         self.discount_factor = config["discount_factor"]
         self.epsilon = config["epsilon_start"]
@@ -16,6 +17,8 @@ class BlackjackBot:
         self.min_epsilon = config["min_epsilon"]
         self.training_episodes = config["training_episodes"]
         self.evaluation_games = config["evaluation_games"]
+        self.results_file = results_file
+        self.q_table_file = q_table_file
 
         self.card_values = {
             '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
@@ -23,9 +26,23 @@ class BlackjackBot:
         }
 
         self.deck = []
-        self.q_table = {}
+        self.q_table = self.load_q_table()  # Load existing Q-table
         self.training_progress = []
         self.shuffle_deck()
+        self.results_buffer = {"Wins": 0, "Losses": 0, "Ties": 0}  # Store results in memory
+
+    def load_q_table(self):
+        """Loads the Q-table from a file if it exists."""
+        if os.path.exists(self.q_table_file):
+            with open(self.q_table_file, "r") as f:
+                data = json.load(f)
+            return {eval(k): v for k, v in data.items()}  # Convert keys back to tuples
+        return {}
+    
+    def save_q_table(self):
+        """Saves the Q-table to a file after training."""
+        with open(self.q_table_file, "w") as f:
+            json.dump({str(k): v for k, v in self.q_table.items()}, f)
 
     def shuffle_deck(self):
         """Shuffles the deck."""
@@ -93,6 +110,8 @@ class BlackjackBot:
         dealer_hand = [dealer_card, self.deal_card()]
         while self.hand_value(dealer_hand)[0] < 17:
             dealer_hand.append(self.deal_card())
+            if len(dealer_hand) > 10:  # Prevent infinite loops in dealer drawing
+                break
 
         player_score, _ = self.hand_value(player_hand)
         dealer_score, _ = self.hand_value(dealer_hand)
@@ -102,34 +121,79 @@ class BlackjackBot:
 
         return "WIN" if reward == 1 else "LOSS" if reward == -1 else "TIE"
 
-    def train(self, episodes=250000):
-        """Trains the bot by playing multiple games."""
+    def train(self, episodes):
+        """Trains the bot by playing multiple games and logs results."""
         for i in range(episodes):
             result = self.play_hand(train=True)
+            self.log_result(result, i)  # Append results properly
             self.epsilon = max(self.min_epsilon, self.epsilon * (0.999 if i < 125000 else 0.9999))
             if i % 1000 == 0:
-                evaluation = self.evaluate(100)
-                win_rate = evaluation["WIN"] / 100.0
-                self.training_progress.append(win_rate)
+                print(f"Training progress: {i} games completed.")
+        self.save_q_table()
         print("Training completed.")
 
-    def evaluate(self, num_games=100):
+    def evaluate(self, num_games):
         """Evaluates the bot's performance after training."""
         results = {"WIN": 0, "LOSS": 0, "TIE": 0}
         for _ in range(num_games):
             result = self.play_hand(train=False)
             if result in results:
-                results[result] += 1
+                results[result]+=1
         return results
+    
+    def log_result(self, result, episode):
+        """Stores results in memory and writes to file every 10,000 episodes."""
+        if result == "WIN":
+            self.results_buffer["Wins"] += 1
+        elif result == "LOSS":
+            self.results_buffer["Losses"] += 1
+        else:
+            self.results_buffer["Ties"] += 1
+
+        # Only write to file every 10,000 episodes
+        if episode % 10000 == 0:
+            self.write_results_to_csv(episode)
+
+    def write_results_to_csv(self, episode):
+        """Writes the aggregated results to the CSV file in a structured way."""
+        new_entry = {
+            "Episode": episode,
+            "Wins": self.results_buffer["Wins"],
+            "Losses": self.results_buffer["Losses"],
+            "Ties": self.results_buffer["Ties"]
+        }
+
+        df = pd.DataFrame([new_entry])
+        df.to_csv(self.results_file, mode='a', header=not os.path.exists(self.results_file), index=False)
+
+        # Reset in-memory buffer
+        self.results_buffer = {"Wins": 0, "Losses": 0, "Ties": 0}
+
+
+    def load_results(self):
+        """Loads past results and updates win rate tracking."""
+        if os.path.exists(self.results_file):
+            df = pd.read_csv(self.results_file)
+            if not df.empty and all(col in df.columns for col in ["Wins", "Losses", "Ties"]):
+                total_games = df["Wins"].sum() + df["Losses"].sum() + df["Ties"].sum()
+                win_rate = df["Wins"].sum() / total_games if total_games > 0 else 0
+                self.training_progress.append(win_rate)
 
     def plot_training_progress(self):
         """Plots the bot's win rate over training iterations."""
-        if not self.training_progress:
+        if not os.path.exists(self.results_file):
             print("No training data available to plot.")
             return
+
+        df = pd.read_csv(self.results_file)
+        if df.empty or "Episode" not in df.columns:
+            print("No recorded results to plot.")
+            return
+
+        df["Win Rate"] = df["Wins"] / (df["Wins"] + df["Losses"] + df["Ties"])
         plt.figure(figsize=(8,5))
-        plt.plot(range(0, len(self.training_progress) * 1000, 1000), self.training_progress, marker='o', linestyle='-')
-        plt.xlabel("Training Iteration")
+        plt.plot(df["Episode"], df["Win Rate"], marker='o', linestyle='-')
+        plt.xlabel("Training Episode")
         plt.ylabel("Win Rate")
         plt.title("Blackjack Bot Learning Progress")
         plt.grid(True)
