@@ -180,7 +180,7 @@ class BlackjackBot:
                 self.training_progress.append(win_rate)
 
     def plot_training_progress(self):
-        """Plots the bot's win rate over training iterations."""
+        """Plots the bot's win rate over training iterations without blocking execution."""
         if not os.path.exists(self.results_file):
             print("No training data available to plot.")
             return
@@ -191,13 +191,16 @@ class BlackjackBot:
             return
 
         df["Win Rate"] = df["Wins"] / (df["Wins"] + df["Losses"] + df["Ties"])
-        plt.figure(figsize=(8,5))
+        plt.figure(figsize=(8, 5))
         plt.plot(df["Episode"], df["Win Rate"], marker='o', linestyle='-')
         plt.xlabel("Training Episode")
         plt.ylabel("Win Rate")
         plt.title("Blackjack Bot Learning Progress")
         plt.grid(True)
-        plt.show()
+
+        plt.show(block=False)  # Allows script to continue running
+        plt.pause(3)  # Keeps plot open for 3 seconds before closing automatically
+        plt.close()  # Prevents excessive memory usage`
 
 # Train and evaluate bot
 bot = BlackjackBot()
