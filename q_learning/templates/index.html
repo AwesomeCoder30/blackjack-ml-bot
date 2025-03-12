@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack Bot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <h1>Blackjack Bot</h1>
+
+    <form id="blackjack-form">
+        <label>Player Hand:</label>
+        <input type="text" id="player-hand" placeholder="e.g., 10, A" required>
+
+        <label>Dealer Card:</label>
+        <input type="text" id="dealer-card" placeholder="e.g., 5" required>
+
+        <button type="submit">Get Bot Action</button>
+    </form>
+
+    <h2>Bot's Action: <span id="bot-action">-</span></h2>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>
