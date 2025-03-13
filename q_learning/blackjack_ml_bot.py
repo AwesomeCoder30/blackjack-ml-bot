@@ -74,12 +74,18 @@ class BlackjackBot:
         """Chooses an action using an epsilon-greedy strategy."""
         if random.uniform(0, 1) < self.epsilon:
             return random.choice(["hit", "stand", "double"])
+        if state[0] == 21:
+            return "stand"
         return max(["hit", "stand", "double"], key=lambda a: self.q_table.get((state, a), 0))
 
     def update_q_value(self, state, action, reward, next_state):
         """Updates the Q-value for the given state-action pair."""
         max_future_q = max(self.q_table.get((next_state, a), 0) for a in ["hit", "stand", "double"])
         current_q = self.q_table.get((state, action), 0)
+        if state[0] == 21 and action in ["hit", "double"]:
+            reward = -10
+        if state[0] == 21 and action == "stand":
+            reward = 5
         self.q_table[(state, action)] = current_q + self.learning_rate * (reward + self.discount_factor * max_future_q - current_q)
 
     def play_hand(self, train=True):
@@ -95,7 +101,7 @@ class BlackjackBot:
             if action == "hit":
                 player_hand.append(self.deal_card())
                 player_value, soft = self.hand_value(player_hand)
-                next_state = (player_value, self.card_values[dealer_card], soft, len(player_hand), False)  # No double after hit
+                next_state = (player_value, self.card_values[dealer_card], soft, len(player_hand), False)
                 if player_value > 21:
                     if train:
                         self.update_q_value(state, action, -1, next_state)
@@ -104,7 +110,7 @@ class BlackjackBot:
                     self.update_q_value(state, action, 0, next_state)
                 state = next_state
 
-            elif action == "double" and len(player_hand) == 2:  # Only allowed if first move
+            elif action == "double" and len(player_hand) == 2 and player_value < 21:
                 player_hand.append(self.deal_card())
                 player_value, soft = self.hand_value(player_hand)
                 next_state = (player_value, self.card_values[dealer_card], soft, len(player_hand), False)
@@ -124,7 +130,9 @@ class BlackjackBot:
         player_score, _ = self.hand_value(player_hand)
         dealer_score, _ = self.hand_value(dealer_hand)
 
-        if player_score > 21:
+        if player_score == 21 and len(player_hand) == 2:
+            reward = 2
+        elif player_score > 21:
             reward = -1
         elif dealer_score > 21 or player_score > dealer_score:
             reward = 1

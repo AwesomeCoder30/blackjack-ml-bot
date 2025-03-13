@@ -17,7 +17,7 @@ def play():
         print("Received data:", data)
         if not data:
             return jsonify({"error": "Invalid or empty JSON payload"}), 400
-        player_hand = data["player_hand"]
+        player_hand = [card.strip() for card in data["player_hand"].split(",")]
         dealer_card = data["dealer_card"]
 
         player_value, soft = bot.hand_value(player_hand)
