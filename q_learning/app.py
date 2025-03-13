@@ -14,18 +14,21 @@ def play():
     """Receives player's hand and dealer card, returns bot's action."""
     try:
         data = request.get_json()
+        print("Received data:", data)
+        if not data:
+            return jsonify({"error": "Invalid or empty JSON payload"}), 400
         player_hand = data["player_hand"]
         dealer_card = data["dealer_card"]
 
-        # Convert input into a format your bot understands
         player_value, soft = bot.hand_value(player_hand)
         state = (player_value, bot.card_values[dealer_card], soft, len(player_hand), True)
 
-        # Get action from Q-learning bot
         action = bot.choose_action(state)
+        print("Bot action:", action)
         return jsonify({"action": action})
 
     except Exception as e:
+        print("Error:", str(e))
         return jsonify({"error": str(e)}), 400
 
 @app.route("/train", methods=["POST"])
