@@ -70,9 +70,9 @@ class BlackjackBot:
             aces -= 1
         return value, soft
 
-    def choose_action(self, state):
+    def choose_action(self, state, train=True):
         """Chooses an action using an epsilon-greedy strategy."""
-        if random.uniform(0, 1) < self.epsilon:
+        if train and random.uniform(0, 1) < self.epsilon:
             return random.choice(["hit", "stand", "double"])
         if state[0] == 21:
             return "stand"

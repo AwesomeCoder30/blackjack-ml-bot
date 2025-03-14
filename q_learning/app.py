@@ -17,13 +17,15 @@ def play():
         print("Received data:", data)
         if not data:
             return jsonify({"error": "Invalid or empty JSON payload"}), 400
-        player_hand = [card.strip() for card in data["player_hand"].split(",")]
+        player_hand = [card.strip() for card in data["player_hand"]]
         dealer_card = data["dealer_card"]
 
         player_value, soft = bot.hand_value(player_hand)
         state = (player_value, bot.card_values[dealer_card], soft, len(player_hand), True)
 
-        action = bot.choose_action(state)
+        bot.epsilon = 0
+        action = bot.choose_action(state, train=False)
+
         print("Bot action:", action)
         return jsonify({"action": action})
 
