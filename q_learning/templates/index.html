@@ -3,38 +3,48 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Blackjack Bot</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-<body>
-    <h1>Blackjack AI Bot</h1>
+<body class="bg-dark text-light">
+    <div class="container text-center mt-5">
+        <h1 class="display-4 fw-bold text-warning">Blackjack Bot</h1>
 
-    <div id="game">
-        <h2>Dealer's Card: <span id="dealer-card"></span></h2>
-        <h2>Your Hand: <span id="player-hand"></span></h2>
-        <h3>Bot's Recommended Action: <span id="bot-action"></span></h3>
+        <div class="row justify-content-center my-4">
+            <div class="col-md-8 col-lg-6">
+                <div class="card bg-secondary text-light p-3 shadow-lg">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Player Hand:</label>
+                        <input type="text" id="playerHand" class="form-control" placeholder="10,A">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Dealer Card:</label>
+                        <input type="text" id="dealerCard" class="form-control" placeholder="5">
+                    </div>
+                    <button class="btn btn-success btn-lg" onclick="getBotAction()">Get Bot Action</button>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="text-light mt-4">Bot's Action: <span id="botAction" class="text-warning">Waiting...</span></h2>
+
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6">
+                <div class="card bg-dark text-light p-4 shadow">
+                    <h2 class="text-warning text-center">Bot Performance</h2>
+                    <p class="fs-5">Wins: <span id="wins" class="text-success">0</span> | Losses: <span id="losses" class="text-danger">0</span> | Ties: <span id="ties" class="text-info">0</span></p>
+                    <button id="train-btn" class="btn btn-warning w-100">Train Bot (50,000 games)</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <form id="blackjack-form">
-        <label for="player-hand">Enter Your Hand (comma separated):</label>
-        <input type="text" id="player-hand-input" required>
-
-        <label for="dealer-card">Enter Dealer’s Card:</label>
-        <input type="text" id="dealer-card-input" required>
-
-        <button type="submit">Get AI Decision</button>
-    </form>
-
-    <h2>Game History</h2>
-    <ul id="history"></ul>
-
-    <h2>Bot Performance</h2>
-    <p>Wins: <span id="wins">0</span> | Losses: <span id="losses">0</span> | Ties: <span id="ties">0</span></p>
-
-    <button id="train-btn">Train Bot (50,000 games)</button>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 

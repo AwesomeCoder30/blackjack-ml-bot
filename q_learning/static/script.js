@@ -1,30 +1,36 @@
-document.getElementById("blackjack-form").addEventListener("submit", async function(event) {
-    event.preventDefault();
+async function getBotAction() {
+    let playerHand = document.getElementById("playerHand").value.trim();
+    let dealerCard = document.getElementById("dealerCard").value.trim();
 
-    let playerHand = document.getElementById("player-hand-input").value.split(",");
-    let dealerCard = document.getElementById("dealer-card-input").value.trim();
+    if (!playerHand || !dealerCard) {
+        alert("Please enter both Player Hand and Dealer Card.");
+        return;
+    }
 
     let response = await fetch("/play", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ player_hand: playerHand, dealer_card: dealerCard })
+        body: JSON.stringify({ player_hand: playerHand.split(","), dealer_card: dealerCard })
     });
 
     let data = await response.json();
+    document.getElementById("botAction").textContent = data.action || "Error";
+}
 
-    document.getElementById("dealer-card").textContent = dealerCard;
-    document.getElementById("player-hand").textContent = playerHand.join(", ");
-    document.getElementById("bot-action").textContent = data.action;
+async function updateBotPerformance() {
+    let response = await fetch("/evaluate", { method: "GET" });
+    let data = await response.json();
 
-    let historyList = document.getElementById("history");
-    let historyEntry = document.createElement("li");
-    historyEntry.textContent = `Player: ${playerHand.join(", ")} | Dealer: ${dealerCard} | AI Action: ${data.action}`;
-    historyList.prepend(historyEntry);
-});
+    document.getElementById("wins").textContent = data.WIN || 0;
+    document.getElementById("losses").textContent = data.LOSS || 0;
+    document.getElementById("ties").textContent = data.TIE || 0;
+}
 
-// Training the bot from UI
 document.getElementById("train-btn").addEventListener("click", async function() {
     let response = await fetch("/train", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ episodes: 50000 }) });
     let data = await response.json();
     alert(data.message);
+    updateBotPerformance();
 });
+
+window.onload = updateBotPerformance;
