@@ -3,34 +3,33 @@ body {
     text-align: center;
     background-color: #222;
     color: white;
-    padding: 20px;
-}
-
-h1 {
-    margin-bottom: 20px;
-}
-
-form {
-    background: #333;
-    padding: 20px;
-    display: inline-block;
-    border-radius: 5px;
-}
-
-input {
-    margin: 10px;
-    padding: 8px;
-    width: 150px;
 }
 
 button {
-    padding: 10px;
-    background: green;
+    background-color: #ff9800;
     color: white;
     border: none;
+    padding: 10px 20px;
     cursor: pointer;
 }
 
+button:hover {
+    background-color: #e68900;
+}
+
+h1,
 h2 {
-    margin-top: 20px;
+    color: #ffcc00;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+ul li {
+    background: #444;
+    margin: 5px;
+    padding: 10px;
+    border-radius: 5px;
 }

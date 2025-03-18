@@ -9,19 +9,31 @@
 </head>
 
 <body>
-    <h1>Blackjack Bot</h1>
+    <h1>Blackjack AI Bot</h1>
+
+    <div id="game">
+        <h2>Dealer's Card: <span id="dealer-card"></span></h2>
+        <h2>Your Hand: <span id="player-hand"></span></h2>
+        <h3>Bot's Recommended Action: <span id="bot-action"></span></h3>
+    </div>
 
     <form id="blackjack-form">
-        <label>Player Hand:</label>
-        <input type="text" id="player-hand" placeholder="e.g., 10, A" required>
+        <label for="player-hand">Enter Your Hand (comma separated):</label>
+        <input type="text" id="player-hand-input" required>
 
-        <label>Dealer Card:</label>
-        <input type="text" id="dealer-card" placeholder="e.g., 5" required>
+        <label for="dealer-card">Enter Dealer’s Card:</label>
+        <input type="text" id="dealer-card-input" required>
 
-        <button type="submit">Get Bot Action</button>
+        <button type="submit">Get AI Decision</button>
     </form>
 
-    <h2>Bot's Action: <span id="bot-action">-</span></h2>
+    <h2>Game History</h2>
+    <ul id="history"></ul>
+
+    <h2>Bot Performance</h2>
+    <p>Wins: <span id="wins">0</span> | Losses: <span id="losses">0</span> | Ties: <span id="ties">0</span></p>
+
+    <button id="train-btn">Train Bot (50,000 games)</button>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
