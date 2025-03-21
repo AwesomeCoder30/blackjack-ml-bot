@@ -236,9 +236,9 @@ class BlackjackBot:
         plt.legend()
         plt.grid(True)
 
-        plt.show(block=False)  # Allows script to continue running
-        plt.pause(3)  # Keeps plot open for 3 seconds before closing automatically
-        plt.close()  # Prevents excessive memory usage
+        plt.show(block=False)
+        plt.pause(3)
+        plt.close()
 
 
 
