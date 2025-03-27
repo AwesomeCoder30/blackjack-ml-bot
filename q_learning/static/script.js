@@ -33,4 +33,50 @@ document.getElementById("train-btn").addEventListener("click", async function() 
     updateBotPerformance();
 });
 
+document.getElementById("simulate-btn").addEventListener("click", async function() {
+    const response = await fetch("/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+    });
+
+    const data = await response.json();
+
+    const logList = document.getElementById("log-list");
+    logList.innerHTML = "";
+
+    if (data.log) {
+        data.log.forEach((entry, index) => {
+            const item = document.createElement("li");
+            item.className = "list-group-item bg-secondary text-light";
+            item.innerHTML = `
+                <strong>Step ${index + 1}</strong><br>
+                Player Hand: ${entry.player_hand.join(", ")}<br>
+                Dealer Card: ${entry.dealer_card}<br>
+                Action: ${entry.action || "Pending"}
+            `;
+            logList.appendChild(item);
+        });
+
+        document.getElementById("player-score").textContent = data.player_score;
+        document.getElementById("dealer-score").textContent = data.dealer_score;
+
+        const outcomeSpan = document.getElementById("game-outcome");
+        outcomeSpan.textContent = data.outcome;
+
+        outcomeSpan.className = "fw-bold";
+        if (data.outcome === "WIN") {
+            outcomeSpan.classList.add("text-success");
+        } else if (data.outcome === "LOSS") {
+            outcomeSpan.classList.add("text-danger");
+        } else {
+            outcomeSpan.classList.add("text-info");
+        }
+
+        document.getElementById("simulation-log").style.display = "block";
+    } else {
+        alert("Simulation failed.");
+    }
+});
+
+
 window.onload = updateBotPerformance;

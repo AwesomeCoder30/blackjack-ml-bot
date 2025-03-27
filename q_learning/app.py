@@ -51,5 +51,77 @@ def evaluate():
     results = bot.evaluate(100)
     return jsonify(results)
 
+@app.route("/simulate", methods=["POST"])
+def simulate():
+    """Simulates a full Blackjack game and returns the step-by-step play."""
+    try:
+        simulation_log = []
+        player_hand = [bot.deal_card(), bot.deal_card()]
+        dealer_card = bot.deal_card()
+        dealer_hand = [dealer_card, bot.deal_card()]
+
+        player_value, soft = bot.hand_value(player_hand)
+        state = (player_value, bot.card_values[dealer_card], soft, len(player_hand), True)
+
+        simulation_log.append({
+            "player_hand": player_hand.copy(),
+            "dealer_card": dealer_card,
+            "action": None,
+            "state": state
+        })
+
+        while True:
+            action = bot.choose_action(state)
+            simulation_log[-1]["action"] = action
+
+            if action == "hit":
+                player_hand.append(bot.deal_card())
+                player_value, soft = bot.hand_value(player_hand)
+                next_state = (player_value, bot.card_values[dealer_card], soft, len(player_hand), False)
+                state = next_state
+                simulation_log.append({
+                    "player_hand": player_hand.copy(),
+                    "dealer_card": dealer_card,
+                    "action": None,
+                    "state": state
+                })
+                if player_value > 21:
+                    break
+
+            elif action == "double" and len(player_hand) == 2:
+                player_hand.append(bot.deal_card())
+                break
+
+            else:  # stand
+                break
+
+        # Dealer logic
+        dealer_score, _ = bot.hand_value(dealer_hand)
+        while dealer_score < 17:
+            dealer_hand.append(bot.deal_card())
+            dealer_score, _ = bot.hand_value(dealer_hand)
+
+        player_score, _ = bot.hand_value(player_hand)
+        outcome = "TIE"
+        if player_score > 21:
+            outcome = "LOSS"
+        elif dealer_score > 21 or player_score > dealer_score:
+            outcome = "WIN"
+        elif player_score < dealer_score:
+            outcome = "LOSS"
+
+        return jsonify({
+            "log": simulation_log,
+            "final_player_hand": player_hand,
+            "final_dealer_hand": dealer_hand,
+            "player_score": player_score,
+            "dealer_score": dealer_score,
+            "outcome": outcome
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

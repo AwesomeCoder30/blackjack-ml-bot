@@ -26,10 +26,10 @@ class BlackjackBot:
         }
 
         self.deck = []
-        self.q_table = self.load_q_table()  # Load existing Q-table
+        self.q_table = self.load_q_table()
         self.training_progress = []
         self.shuffle_deck()
-        self.results_buffer = {"Wins": 0, "Losses": 0, "Ties": 0}  # Store results in memory
+        self.results_buffer = {"Wins": 0, "Losses": 0, "Ties": 0}
 
     def load_q_table(self):
         """Loads the Q-table from a file if it exists."""
@@ -93,7 +93,7 @@ class BlackjackBot:
         player_hand = [self.deal_card(), self.deal_card()]
         dealer_card = self.deal_card()
         player_value, soft = self.hand_value(player_hand)
-        state = (player_value, self.card_values[dealer_card], soft, len(player_hand), True)  # Adding "can_double"
+        state = (player_value, self.card_values[dealer_card], soft, len(player_hand), True)
 
         while True:
             action = self.choose_action(state)
@@ -114,7 +114,7 @@ class BlackjackBot:
                 player_hand.append(self.deal_card())
                 player_value, soft = self.hand_value(player_hand)
                 next_state = (player_value, self.card_values[dealer_card], soft, len(player_hand), False)
-                reward = 2 if player_value <= 21 else -2  # Adjusted reward
+                reward = 2 if player_value <= 21 else -2
                 if train:
                     self.update_q_value(state, action, reward, next_state)
                 return "WIN" if reward > 0 else "LOSS"
@@ -150,14 +150,14 @@ class BlackjackBot:
 
     def train(self, episodes):
         """Trains the bot by playing multiple games, using a better Q-learning update process."""
-        self.q_table = self.load_q_table()  # Load existing Q-table at start
+        self.q_table = self.load_q_table()
         for i in range(episodes):
             result = self.play_hand(train=True)
             self.log_result(result, i)
-            self.epsilon = max(self.min_epsilon, self.epsilon * 0.999)  # Slower decay
+            self.epsilon = max(self.min_epsilon, self.epsilon * 0.999)
             if i % 10000 == 0:
                 print(f"Training progress: {i} games completed.")
-            if i % 50000 == 0:  # Save Q-table every 50k episodes
+            if i % 50000 == 0:
                 self.save_q_table()
         self.save_q_table()
         print("Training completed.")
@@ -223,7 +223,7 @@ class BlackjackBot:
 
         # Compute win rate and rolling average
         df["Win Rate"] = df["Wins"] / (df["Wins"] + df["Losses"] + df["Ties"])
-        df["Rolling Win Rate"] = df["Win Rate"].rolling(10, min_periods=1).mean()  # Rolling avg over 10 entries
+        df["Rolling Win Rate"] = df["Win Rate"].rolling(10, min_periods=1).mean()
 
         # Plot raw win rate and rolling average
         plt.figure(figsize=(8, 5))
