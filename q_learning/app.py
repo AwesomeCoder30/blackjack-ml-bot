@@ -1,9 +1,12 @@
 from flask import Flask, render_template, request, jsonify # type: ignore
 from blackjack_ml_bot import BlackjackBot
 import requests # type: ignore
+import json
+import os
 
 app = Flask(__name__)
 bot = BlackjackBot()
+os.makedirs("saved_models", exist_ok=True)
 
 @app.route("/")
 def index():
@@ -122,6 +125,38 @@ def simulate():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
+@app.route("/save", methods=["POST"])
+def save_bot():
+    data = request.get_json()
+    name = data.get("name")
+    if not name:
+        return jsonify({"error": "Name required"}), 400
+
+    q_table_file = f"saved_models/q_table_{name}.json"
+    with open(q_table_file, "w") as f:
+        json.dump({str(k): v for k, v in bot.q_table.items()}, f)
+    return jsonify({"message": f"Bot saved as '{name}'."})
+
+@app.route("/load", methods=["POST"])
+def load_bot():
+    data = request.get_json()
+    name = data.get("name")
+    if not name:
+        return jsonify({"error": "Name required"}), 400
+
+    q_table_file = f"saved_models/q_table_{name}.json"
+    if not os.path.exists(q_table_file):
+        return jsonify({"error": "Model not found"}), 404
+
+    with open(q_table_file, "r") as f:
+        bot.q_table = {eval(k): v for k, v in json.load(f).items()}
+    return jsonify({"message": f"Bot '{name}' loaded successfully."})
+
+@app.route("/models", methods=["GET"])
+def list_models():
+    files = os.listdir("saved_models")
+    models = [f.replace("q_table_", "").replace(".json", "") for f in files if f.endswith(".json")]
+    return jsonify(models)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

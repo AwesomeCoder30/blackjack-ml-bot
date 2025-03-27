@@ -41,9 +41,24 @@
                     <button id="train-btn" class="btn btn-warning w-100">Train Bot (50,000 games)</button>
                 </div>
                 <div class="mt-4">
-                    <button id="simulate-btn" class="btn btn-primary w-100">Simulate a Full Game</button>
+                    <button id="simulate-btn" class="btn btn-warning w-100 my-1">Simulate a Full Game</button>
                 </div>
+                <div class="card bg-dark text-light p-4 shadow mt-4">
+                    <h3 class="text-info">Model Management</h3>
 
+                    <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mt-3">
+                        <input id="modelNameInput" type="text" class="form-control w-50" placeholder="Enter model name (e.g. aggressive)">
+                        <button class="btn btn-outline-info" onclick="saveModel()">💾 Save Q-Table</button>
+                        <button class="btn btn-outline-warning" onclick="loadModel()">📤 Load Q-Table</button>
+                    </div>
+
+                    <div class="mt-3">
+                        <label class="form-label text-light">Available Models:</label>
+                        <select id="modelSelect" class="form-select text-dark bg-light">
+                            <!-- Filled dynamically -->
+                        </select>
+                    </div>
+                </div>
                 <div class="mt-4 text-start" id="simulation-log" style="display:none;">
                     <h4 class="text-info">Simulation Log</h4>
                     <ul class="list-group" id="log-list"></ul>

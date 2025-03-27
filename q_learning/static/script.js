@@ -78,5 +78,70 @@ document.getElementById("simulate-btn").addEventListener("click", async function
     }
 });
 
+async function saveModel() {
+    const modelName = document.getElementById("modelNameInput").value.trim();
+    if (!modelName) {
+        alert("Please enter a model name.");
+        return;
+    }
 
-window.onload = updateBotPerformance;
+    const response = await fetch("/save_model", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: modelName })
+    });
+
+    const data = await response.json();
+    alert(data.message || "Error saving model.");
+    updateModelList();
+}
+
+async function loadModel() {
+    const selectedModel = document.getElementById("modelSelect").value;
+    if (!selectedModel) {
+        alert("Please select a model to load.");
+        return;
+    }
+
+    const response = await fetch("/load_model", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: selectedModel })
+    });
+
+    const data = await response.json();
+    alert(data.message || "Error loading model.");
+    updateBotPerformance();
+}
+
+async function updateModelList() {
+    const response = await fetch("/list_models");
+    const data = await response.json();
+
+    const select = document.getElementById("modelSelect");
+    select.innerHTML = "";
+
+    if (!data.models || data.models.length === 0) {
+        const option = document.createElement("option");
+        option.textContent = "No models to choose from";
+        option.disabled = true;
+        option.selected = true;
+        option.style.fontStyle = "italic";
+        option.style.color = "#888";
+        select.appendChild(option);
+        return;
+    }
+
+    data.models.forEach((model) => {
+        const option = document.createElement("option");
+        option.value = model;
+        option.textContent = model;
+        select.appendChild(option);
+    });
+}
+
+
+window.onload = function() {
+    updateBotPerformance();
+    updateModelList();
+};

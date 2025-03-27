@@ -67,3 +67,66 @@ ul li {
     font-size: 1.1rem;
     color: #ffc107;
 }
+
+#modelNameInput {
+    max-width: 300px;
+    margin: auto;
+}
+
+#modelSelect {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.model-actions button {
+    min-width: 140px;
+}
+
+.card h3 {
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+#simulate-btn {
+    background-color: #f9ca24;
+    color: black;
+    font-weight: bold;
+    border: none;
+}
+
+#simulate-btn:hover {
+    background-color: #e1b722;
+}
+
+
+/* Buttons */
+
+.btn-outline-info {
+    color: #17c0eb;
+    border-color: #17c0eb;
+}
+
+.btn-outline-info:hover {
+    background-color: #17c0eb;
+    color: white;
+}
+
+.btn-outline-warning {
+    color: #f9ca24;
+    border-color: #f9ca24;
+}
+
+.btn-outline-warning:hover {
+    background-color: #f9ca24;
+    color: black;
+}
+
+#modelSelect {
+    max-width: 300px;
+    margin: 0 auto;
+    background-color: #444;
+    color: #fff;
+    border: 1px solid #666;
+    padding: 8px;
+    border-radius: 5px;
+}
