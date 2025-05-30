@@ -12,12 +12,34 @@ os.makedirs("saved_models", exist_ok=True)
 def index():
     return render_template("index.html")
 
+@app.route("/about", methods=["GET"])
+def about():
+    info = {
+        "title": "Blackjack Q-Learning Bot",
+        "description": (
+            "This project demonstrates a reinforcement learning (Q-learning) agent that learns to play Blackjack optimally. "
+            "You can train the bot, play against it, simulate games, and visualize its learning progress. "
+            "The project is designed for educational and research purposes, showcasing how AI can learn strategies in a classic card game."
+        ),
+        "motivation": (
+            "Blackjack is a simple yet rich environment for reinforcement learning. "
+            "The goal is to show how an agent can learn from experience, improve over time, and make decisions based on learned Q-values."
+        ),
+        "features": [
+            "Train the bot using Q-learning",
+            "Play against the bot and see its decisions",
+            "Simulate full games and view step-by-step logs",
+            "Save and load different trained models",
+            "Visualize training progress and bot performance"
+        ]
+    }
+    return jsonify(info)
+
 @app.route("/play", methods=["POST"])
 def play():
-    """Receives player's hand and dealer card, returns bot's action."""
+    """Receives player's hand and dealer card, returns bot's action and confidence."""
     try:
         data = request.get_json()
-        print("Received data:", data)
         if not data:
             return jsonify({"error": "Invalid or empty JSON payload"}), 400
         player_hand = [card.strip() for card in data["player_hand"]]
@@ -28,12 +50,11 @@ def play():
 
         bot.epsilon = 0
         action = bot.choose_action(state, train=False)
+        # Get Q-value/confidence for the chosen action
+        q_value = bot.q_table.get((state, action), 0)
 
-        print("Bot action:", action)
-        return jsonify({"action": action})
-
+        return jsonify({"action": action, "confidence": round(100 * (q_value + 1) / 2)})
     except Exception as e:
-        print("Error:", str(e))
         return jsonify({"error": str(e)}), 400
 
 @app.route("/train", methods=["POST"])
@@ -44,7 +65,6 @@ def train():
         episodes = data.get("episodes", 50000)  # Default: 50,000 episodes
         bot.train(episodes)
         return jsonify({"message": f"Training completed for {episodes} episodes."})
-
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
@@ -121,42 +141,38 @@ def simulate():
             "dealer_score": dealer_score,
             "outcome": outcome
         })
-
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-@app.route("/save", methods=["POST"])
+@app.route("/save_model", methods=["POST"])
 def save_bot():
     data = request.get_json()
     name = data.get("name")
     if not name:
         return jsonify({"error": "Name required"}), 400
-
     q_table_file = f"saved_models/q_table_{name}.json"
     with open(q_table_file, "w") as f:
         json.dump({str(k): v for k, v in bot.q_table.items()}, f)
     return jsonify({"message": f"Bot saved as '{name}'."})
 
-@app.route("/load", methods=["POST"])
+@app.route("/load_model", methods=["POST"])
 def load_bot():
     data = request.get_json()
     name = data.get("name")
     if not name:
         return jsonify({"error": "Name required"}), 400
-
     q_table_file = f"saved_models/q_table_{name}.json"
     if not os.path.exists(q_table_file):
         return jsonify({"error": "Model not found"}), 404
-
     with open(q_table_file, "r") as f:
         bot.q_table = {eval(k): v for k, v in json.load(f).items()}
     return jsonify({"message": f"Bot '{name}' loaded successfully."})
 
-@app.route("/models", methods=["GET"])
+@app.route("/list_models", methods=["GET"])
 def list_models():
     files = os.listdir("saved_models")
     models = [f.replace("q_table_", "").replace(".json", "") for f in files if f.endswith(".json")]
-    return jsonify(models)
+    return jsonify({"models": models})
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)

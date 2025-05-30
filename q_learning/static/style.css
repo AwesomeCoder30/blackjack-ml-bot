@@ -1,8 +1,152 @@
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #222;
-    color: white;
+    background: #f7f4fa;
+    color: #333;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.navbar,
+.modal-content {
+    background: #ede7f6 !important;
+}
+
+.navbar-brand,
+.nav-link,
+.modal-title {
+    color: #6c3fc5 !important;
+}
+
+.step-guide {
+    background: #ede7f6;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.step-guide .step {
+    color: #6c3fc5;
+    font-weight: 600;
+}
+
+.tab-content>.tab-pane {
+    padding-top: 2rem;
+}
+
+.card {
+    background: #fff;
+    border: 1px solid #e0d7f3;
+    border-radius: 1rem;
+}
+
+.card-header {
+    background: #e1bee7;
+    color: #6c3fc5;
+    font-weight: 700;
+    border-radius: 1rem 1rem 0 0;
+}
+
+.btn-primary,
+.btn-outline-primary {
+    background: #8e24aa;
+    border-color: #8e24aa;
+    color: #fff;
+}
+
+.btn-primary:hover,
+.btn-outline-primary:hover {
+    background: #6c3fc5;
+    border-color: #6c3fc5;
+    color: #fff;
+}
+
+.btn-warning,
+.btn-success,
+.btn-info,
+.btn-outline-warning,
+.btn-outline-success,
+.btn-outline-info {
+    background: #8e24aa !important;
+    border-color: #8e24aa !important;
+    color: #fff !important;
+}
+
+.btn-warning:hover,
+.btn-success:hover,
+.btn-info:hover,
+.btn-outline-warning:hover,
+.btn-outline-success:hover,
+.btn-outline-info:hover {
+    background: #6c3fc5 !important;
+    border-color: #6c3fc5 !important;
+    color: #fff !important;
+}
+
+.form-label {
+    color: #6c3fc5;
+    font-weight: 600;
+}
+
+.progress-bar.bg-success,
+.progress-bar.bg-warning,
+.progress-bar.bg-danger {
+    background: #8e24aa !important;
+}
+
+.nav-tabs .nav-link.active {
+    background: #ede7f6;
+    color: #6c3fc5;
+    border-color: #e1bee7 #e1bee7 #fff;
+}
+
+.nav-tabs .nav-link {
+    color: #6c3fc5;
+}
+
+.text-purple {
+    color: #8e24aa !important;
+}
+
+.bg-purple {
+    background: #ede7f6 !important;
+}
+
+.stats-container .stat-item {
+    color: #6c3fc5;
+    font-weight: 500;
+    background: #ede7f6;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 1rem;
+}
+
+input,
+select,
+textarea {
+    background: #f7f4fa !important;
+    border: 1px solid #e1bee7 !important;
+    color: #333 !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #8e24aa !important;
+    box-shadow: 0 0 0 0.2rem rgba(142, 36, 170, 0.1) !important;
+}
+
+.alert-secondary {
+    background: #ede7f6 !important;
+    color: #6c3fc5 !important;
+    border-color: #e1bee7 !important;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    background: #ede7f6;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #e1bee7;
+    border-radius: 4px;
 }
 
 button {

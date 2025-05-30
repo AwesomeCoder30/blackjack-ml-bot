@@ -4,75 +4,375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Blackjack Bot</title>
+    <title>Blackjack Q-Learning Bot</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            background: #f7f4fa;
+        }
+        
+        .navbar,
+        .modal-content {
+            background: #ede7f6 !important;
+        }
+        
+        .navbar-brand,
+        .nav-link,
+        .modal-title {
+            color: #6c3fc5 !important;
+        }
+        
+        .step-guide {
+            background: #ede7f6;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .step-guide .step {
+            color: #6c3fc5;
+            font-weight: 600;
+        }
+        
+        .tab-content>.tab-pane {
+            padding-top: 2rem;
+        }
+        
+        .card {
+            background: #fff;
+            border: 1px solid #e0d7f3;
+            border-radius: 1rem;
+        }
+        
+        .card-header {
+            background: #e1bee7;
+            color: #6c3fc5;
+            font-weight: 700;
+            border-radius: 1rem 1rem 0 0;
+        }
+        
+        .btn-primary,
+        .btn-outline-primary {
+            background: #8e24aa;
+            border-color: #8e24aa;
+            color: #fff;
+        }
+        
+        .btn-primary:hover,
+        .btn-outline-primary:hover {
+            background: #6c3fc5;
+            border-color: #6c3fc5;
+            color: #fff;
+        }
+        
+        .form-label {
+            color: #6c3fc5;
+            font-weight: 600;
+        }
+        
+        .progress-bar.bg-success,
+        .progress-bar.bg-warning,
+        .progress-bar.bg-danger {
+            background: #8e24aa !important;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: #ede7f6;
+            color: #6c3fc5;
+            border-color: #e1bee7 #e1bee7 #fff;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #6c3fc5;
+        }
+        
+        .text-purple {
+            color: #8e24aa !important;
+        }
+        
+        .bg-purple {
+            background: #ede7f6 !important;
+        }
+        /* Key Features List Styling */
+        
+        .modal-content ul {
+            padding-left: 0;
+        }
+        
+        .modal-content ul li {
+            background: #fff;
+            color: #6c3fc5;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            padding: 18px 24px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            box-shadow: 0 2px 8px 0 #b388ff22;
+            list-style: none;
+            opacity: 1;
+        }
+    </style>
 </head>
 
-<body class="bg-dark text-light">
-    <div class="container text-center mt-5">
-        <h1 class="display-4 fw-bold text-warning">Blackjack Bot</h1>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light border-bottom border-purple">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#"><i class="fas fa-robot me-2"></i>Blackjack Q-Learning Bot</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal"><i class="fas fa-info-circle me-1"></i>About</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-        <div class="row justify-content-center my-4">
-            <div class="col-md-8 col-lg-6">
-                <div class="card bg-secondary text-light p-3 shadow-lg">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Player Hand:</label>
-                        <input type="text" id="playerHand" class="form-control" placeholder="10,A">
+    <!-- Step-by-step Guide -->
+    <div class="container step-guide mt-4">
+        <div class="row text-center">
+            <div class="col-md-4 step"><span class="fs-4">1️⃣ Train the Bot</span><br><span class="text-muted">Let the bot learn by playing thousands of games.</span></div>
+            <div class="col-md-4 step"><span class="fs-4">2️⃣ Simulate or Play</span><br><span class="text-muted">Test the bot by simulating or playing a game.</span></div>
+            <div class="col-md-4 step"><span class="fs-4">3️⃣ Save/Load Model</span><br><span class="text-muted">Save your trained bot or load a previous model.</span></div>
+        </div>
+    </div>
+
+    <!-- Main Interactive Tabs -->
+    <div class="container py-3">
+        <ul class="nav nav-tabs nav-justified mb-4" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="play-tab" data-bs-toggle="tab" data-bs-target="#play" type="button" role="tab">Play</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="train-tab" data-bs-toggle="tab" data-bs-target="#train" type="button" role="tab">Train</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="simulate-tab" data-bs-toggle="tab" data-bs-target="#simulate" type="button" role="tab">Simulate</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="models-tab" data-bs-toggle="tab" data-bs-target="#models" type="button" role="tab">Models</button>
+            </li>
+        </ul>
+        <div class="tab-content" id="mainTabsContent">
+            <!-- Play Tab -->
+            <div class="tab-pane fade" id="play" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-lg-7">
+                        <div class="card bg-secondary text-light shadow">
+                            <div class="card-header bg-warning text-dark fw-bold">
+                                <i class="fas fa-gamepad me-2"></i>Play Blackjack
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Player Hand</label>
+                                        <div class="input-group">
+                                            <input type="text" id="playerHand" class="form-control" placeholder="10,A">
+                                            <button class="btn btn-outline-warning" onclick="randomizePlayerHand()" title="Randomize"><i class="fas fa-random"></i></button>
+                                        </div>
+                                        <small class="text-muted">Enter cards separated by commas (e.g., 10,A)</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Dealer Card</label>
+                                        <div class="input-group">
+                                            <input type="text" id="dealerCard" class="form-control" placeholder="5">
+                                            <button class="btn btn-outline-warning" onclick="randomizeDealerCard()" title="Randomize"><i class="fas fa-random"></i></button>
+                                        </div>
+                                        <small class="text-muted">Enter dealer's visible card</small>
+                                    </div>
+                                </div>
+                                <button class="btn btn-warning btn-lg w-100 mt-4" onclick="getBotAction()">
+                                    <i class="fas fa-brain me-2"></i>Get Bot's Decision
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card bg-black border-info mt-4 shadow">
+                            <div class="card-header bg-info text-dark fw-bold">
+                                <i class="fas fa-robot me-2"></i>Bot's Decision
+                            </div>
+                            <div class="card-body text-center">
+                                <div id="botAction" class="display-4 text-warning mb-3">Waiting...</div>
+                                <div id="confidenceMeter" class="progress mb-3" style="height: 25px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="text-muted">Confidence in decision (Q-value)</small>
+                                <div id="qvalue-explanation" class="mt-2 text-info small"></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Dealer Card:</label>
-                        <input type="text" id="dealerCard" class="form-control" placeholder="5">
+                    <div class="col-lg-5">
+                        <div class="card bg-black border-warning shadow">
+                            <div class="card-header bg-warning text-dark fw-bold">
+                                <i class="fas fa-chart-line me-2"></i>Bot Performance
+                            </div>
+                            <div class="card-body">
+                                <div class="stats-container mb-3">
+                                    <div class="stat-item"><i class="fas fa-trophy text-success"></i> Wins: <span id="wins" class="text-success">0</span></div>
+                                    <div class="stat-item"><i class="fas fa-times-circle text-danger"></i> Losses: <span id="losses" class="text-danger">0</span></div>
+                                    <div class="stat-item"><i class="fas fa-equals text-info"></i> Ties: <span id="ties" class="text-info">0</span></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <button class="btn btn-success btn-lg" onclick="getBotAction()">Get Bot Action</button>
+                </div>
+            </div>
+            <!-- Train Tab (default active) -->
+            <div class="tab-pane fade show active" id="train" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-lg-7">
+                        <div class="card bg-black border-primary shadow">
+                            <div class="card-header bg-primary text-dark fw-bold">
+                                <i class="fas fa-graduation-cap me-2"></i>Train the Bot
+                            </div>
+                            <div class="card-body">
+                                <form id="train-form" class="row g-3 align-items-end">
+                                    <div class="col-md-8">
+                                        <label class="form-label">Number of Training Games</label>
+                                        <input type="number" id="train-episodes" class="form-control" value="50000" min="1000" step="1000">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button id="train-btn" type="submit" class="btn btn-warning btn-lg w-100 mt-2">
+                                            <i class="fas fa-graduation-cap me-2"></i>Train
+                                        </button>
+                                    </div>
+                                </form>
+                                <div id="train-status" class="mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="card bg-black border-primary shadow">
+                            <div class="card-header bg-primary text-dark fw-bold">
+                                <i class="fas fa-chart-bar me-2"></i>Training Progress
+                            </div>
+                            <div class="card-body">
+                                <canvas id="trainingChart" height="180"></canvas>
+                                <small class="text-muted">Win rate over training episodes</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Simulate Tab -->
+            <div class="tab-pane fade" id="simulate" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-lg-7">
+                        <div class="card bg-black border-success shadow">
+                            <div class="card-header bg-success text-dark fw-bold">
+                                <i class="fas fa-play-circle me-2"></i>Simulate a Full Game
+                            </div>
+                            <div class="card-body">
+                                <button id="simulate-btn" class="btn btn-success btn-lg w-100 mb-3">
+                                    <i class="fas fa-play me-2"></i>Simulate
+                                </button>
+                                <div id="simulation-log" style="display:none;">
+                                    <h4 class="text-info mb-3">Game Progress</h4>
+                                    <div id="log-list" class="simulation-steps"></div>
+                                    <div class="game-summary mt-4 p-3 bg-dark rounded">
+                                        <h5 class="text-warning">Game Summary</h5>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <p><strong>Player Score:</strong> <span id="player-score" class="text-success">-</span></p>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <p><strong>Dealer Score:</strong> <span id="dealer-score" class="text-danger">-</span></p>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <p><strong>Outcome:</strong> <span id="game-outcome" class="fw-bold">-</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="card bg-black border-info shadow">
+                            <div class="card-header bg-info text-dark fw-bold">
+                                <i class="fas fa-lightbulb me-2"></i>How the Bot Thinks
+                            </div>
+                            <div class="card-body">
+                                <div id="simulate-explanation" class="text-info small">Step-by-step log and reasoning will appear here after simulation.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Models Tab -->
+            <div class="tab-pane fade" id="models" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-lg-7">
+                        <div class="card bg-black border-info shadow">
+                            <div class="card-header bg-info text-dark fw-bold">
+                                <i class="fas fa-database me-2"></i>Model Management
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Save New Model:</label>
+                                    <div class="input-group">
+                                        <input id="modelNameInput" type="text" class="form-control" placeholder="Enter model name">
+                                        <button class="btn btn-outline-info" onclick="saveModel()"><i class="fas fa-save"></i></button>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Load Existing Model:</label>
+                                    <select id="modelSelect" class="form-select mb-2"></select>
+                                    <button class="btn btn-outline-warning w-100" onclick="loadModel()">
+                                        <i class="fas fa-upload me-2"></i>Load Selected Model
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="card bg-black border-info shadow">
+                            <div class="card-header bg-info text-dark fw-bold">
+                                <i class="fas fa-question-circle me-2"></i>What is a Model?
+                            </div>
+                            <div class="card-body">
+                                <div class="text-info small">A model is a saved Q-table representing the bot's learned strategy. You can save, load, and switch between different strategies here.</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <h2 class="text-light mt-4">Bot's Action: <span id="botAction" class="text-warning">Waiting...</span></h2>
-
-        <div class="row justify-content-center mt-4">
-            <div class="col-md-6">
-                <div class="card bg-dark text-light p-4 shadow">
-                    <h2 class="text-warning text-center">Bot Performance</h2>
-                    <p class="fs-5">Wins: <span id="wins" class="text-success">0</span> | Losses: <span id="losses" class="text-danger">0</span> | Ties: <span id="ties" class="text-info">0</span></p>
-                    <button id="train-btn" class="btn btn-warning w-100">Train Bot (50,000 games)</button>
+    <!-- About Modal (now hardcoded, not dynamic) -->
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h2 class="modal-title text-purple" id="aboutModalLabel"><i class="fas fa-info-circle me-2"></i>About This Project</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="mt-4">
-                    <button id="simulate-btn" class="btn btn-warning w-100 my-1">Simulate a Full Game</button>
-                </div>
-                <div class="card bg-dark text-light p-4 shadow mt-4">
-                    <h3 class="text-info">Model Management</h3>
-
-                    <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mt-3">
-                        <input id="modelNameInput" type="text" class="form-control w-50" placeholder="Enter model name (e.g. aggressive)">
-                        <button class="btn btn-outline-info" onclick="saveModel()">💾 Save Q-Table</button>
-                        <button class="btn btn-outline-warning" onclick="loadModel()">📤 Load Q-Table</button>
-                    </div>
-
-                    <div class="mt-3">
-                        <label class="form-label text-light">Available Models:</label>
-                        <select id="modelSelect" class="form-select text-dark bg-light">
-                            <!-- Filled dynamically -->
-                        </select>
-                    </div>
-                </div>
-                <div class="mt-4 text-start" id="simulation-log" style="display:none;">
-                    <h4 class="text-info">Simulation Log</h4>
-                    <ul class="list-group" id="log-list"></ul>
-                    <p class="mt-3">
-                        <strong>Player Score:</strong> <span id="player-score"></span><br>
-                        <strong>Dealer Score:</strong> <span id="dealer-score"></span><br>
-                        <strong>Outcome:</strong> <span id="game-outcome" class="fw-bold"></span>
-                    </p>
+                <div class="modal-body">
+                    <h4 class="text-purple">What is this?</h4>
+                    <p>This project demonstrates a reinforcement learning (Q-learning) agent that learns to play Blackjack optimally. You can train the bot, play against it, simulate games, and visualize its learning progress. The project is designed for
+                        educational and research purposes, showcasing how AI can learn strategies in a classic card game.</p>
+                    <h5 class="text-purple mt-4">Motivation</h5>
+                    <p>Blackjack is a simple yet rich environment for reinforcement learning. The goal is to show how an agent can learn from experience, improve over time, and make decisions based on learned Q-values.</p>
+                    <h6 class="text-purple mt-4">Key Features</h6>
+                    <ul>
+                        <li>Train the bot using Q-learning</li>
+                        <li>Play against the bot and see its decisions</li>
+                        <li>Simulate full games and view step-by-step logs</li>
+                        <li>Save and load different trained models</li>
+                        <li>Visualize training progress and bot performance</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 
