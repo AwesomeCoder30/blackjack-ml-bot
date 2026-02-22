@@ -1,46 +1,47 @@
-# Blackjack ML Bot
+# Blackjack Q-Learning Bot
 
-## Overview
+Q-learning Blackjack agent with a web UI. Train the bot, get actions for a hand, simulate full games, and save/load models.
 
-The **Blackjack ML Bot** is a reinforcement learning-based Blackjack player that learns optimal strategies through Q-learning. It adjusts its actions dynamically based on experience and improves its decision-making over time.
+## Stack
 
-## Features
+TypeScript (Node backend + Vite frontend), Express, Bootstrap, Chart.js.
 
-- **Q-Learning AI**: Learns from previous games and updates its decision-making.
-- **Dynamic Epsilon Decay**: Reduces exploration as training progresses.
-- **Double Down Support**: Implements doubling down for improved strategy.
-- **Graphical Training Analysis**: Plots win rate over training.
+## Setup
 
-## Installation
+```bash
+cd q_learning
+npm install
+```
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/YOUR-USERNAME/blackjack-ml-bot.git
-   cd blackjack-ml-bot
-   ```
-2. Install dependencies:
-   ```bash
-   pip install matplotlib
-   ```
-3. Run the bot:
-   ```bash
-   python blackjack_ml_bot.py
-   ```
+Config and runtime data live under `data/`. Copy `data/config.json` from the repo; optional: copy an existing `q_table.json` into `data/` to start from a trained table.
 
-## Configuration
+## Run
 
-Modify `config.json` to customize training parameters.
+```bash
+npm run build
+npm start
+```
 
-## Usage
+Then open http://localhost:5001 (or the port in `PORT`).
 
-- Run `blackjack_ml_bot.py` to train and evaluate the bot.
-- Modify `test_blackjack.py` to add test cases and verify bot behavior.
+- **Dev:** `npm run dev` runs the backend with tsx watch. Build the frontend once with `npm run build:frontend` and serve it, or use a separate Vite dev server.
+- **Env:** `PORT` (default 5001), `DATA_DIR` (default `./data`).
 
-## Contributing
+## Tests
 
-Feel free to submit pull requests or open issues.
+```bash
+npm test
+```
+
+Unit tests cover domain (hand, deck, game, Q-learning agent) and persistence. Integration tests hit the HTTP API.
+
+## Architecture
+
+- **Domain** (`src/domain`): Deck, hand value, one-round game, Q-learning agent, bot (orchestrates game + agent + stores).
+- **Backend** (`src/backend`): Express app, routes (play, train, evaluate, simulate, models, about, training_progress), services, file-based persistence (Q-table, config, results CSV).
+- **Frontend** (`src/frontend`): Single HTML entry, TypeScript entrypoint, API client, one CSS bundle. About content and training chart use the API.
+- **Shared** (`src/shared`): Request/response and shared types.
 
 ## License
 
-MIT License.
-
+MIT.

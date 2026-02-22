@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Blackjack AI Lab</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles/main.css">
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="header-left">
+            <h1 class="app-title">Blackjack AI Lab</h1>
+            <p class="app-subtitle">Reinforcement learning through Q-Agent optimization.</p>
+        </div>
+        <div class="header-right">
+            <div class="stats-panel">
+                <div class="stats-row">
+                    <span class="stats-label">WINS</span>
+                    <span class="stats-label">LOSSES</span>
+                    <span class="stats-label">TIES</span>
+                </div>
+                <div class="stats-row">
+                    <span id="wins" class="stats-value">0</span>
+                    <span id="losses" class="stats-value">0</span>
+                    <span id="ties" class="stats-value">0</span>
+                </div>
+            </div>
+            <button type="button" class="btn-about" data-bs-toggle="modal" data-bs-target="#aboutModal" aria-label="About"><i class="fas fa-info-circle"></i></button>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <div class="two-columns">
+            <div class="column-left">
+                <section class="card lab-card">
+                    <h2 class="card-title"><i class="fas fa-bolt me-2"></i>Train</h2>
+                    <form id="train-form" class="train-form">
+                        <div class="train-games-row">
+                            <label class="form-label" for="train-episodes">Games</label>
+                            <span id="train-episodes-display" class="train-episodes-value">50,000</span>
+                        </div>
+                        <input type="range" id="train-episodes-slider" class="form-range" min="1000" max="100000" step="1000" value="50000">
+                        <input type="number" id="train-episodes" name="episodes" value="50000" min="1000" step="1000" class="visually-hidden" aria-hidden="true">
+                        <button type="submit" id="train-btn" class="btn-primary-lab"><i class="fas fa-play me-2"></i>Start Training</button>
+                        <div id="train-status" class="train-status">Ready to begin training.</div>
+                        <div class="train-chart-wrap">
+                            <canvas id="trainingChart" height="120"></canvas>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="card lab-card">
+                    <h2 class="card-title"><i class="fas fa-file-alt me-2"></i>Models</h2>
+                    <div class="models-row">
+                        <input type="text" id="modelNameInput" class="form-input" placeholder="New model name...">
+                        <button type="button" id="saveModelBtn" class="btn-icon" title="Save model"><i class="fas fa-save"></i></button>
+                    </div>
+                    <div class="models-row">
+                        <select id="modelSelect" class="form-input form-select">
+                            <option value="">Load existing model...</option>
+                        </select>
+                        <button type="button" id="loadModelBtn" class="btn-icon" title="Load model"><i class="fas fa-download"></i></button>
+                    </div>
+                </section>
+            </div>
+
+            <div class="column-right">
+                <section class="card lab-card">
+                    <h2 class="card-title">Decision Lab</h2>
+                    <div class="decision-row">
+                        <div class="input-group-lab">
+                            <label class="form-label" for="playerHand">Player Hand</label>
+                            <div class="input-with-icon">
+                                <input type="text" id="playerHand" class="form-input" placeholder="10,5" value="10,5">
+                                <button type="button" id="randPlayer" class="btn-icon-sm" title="Randomize"><i class="fas fa-dice"></i></button>
+                            </div>
+                        </div>
+                        <div class="input-group-lab">
+                            <label class="form-label" for="dealerCard">Dealer's Card</label>
+                            <div class="input-with-icon">
+                                <input type="text" id="dealerCard" class="form-input" placeholder="9" value="9">
+                                <button type="button" id="randDealer" class="btn-icon-sm" title="Randomize"><i class="fas fa-dice"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" id="getBotAction" class="btn-primary-lab"><i class="fas fa-play me-2"></i>Request AI Recommendation</button>
+                    <div id="decision-status" class="decision-status">
+                        <span class="decision-status-icon"><i class="fas fa-dice"></i></span>
+                        <span id="decision-status-text">Waiting for input parameters...</span>
+                    </div>
+                    <div id="decision-result" class="decision-result-card" style="display: none;">
+                        <div class="decision-result-left">
+                            <span class="decision-result-label">Optimal Action</span>
+                            <div id="botAction" class="decision-result-action">—</div>
+                        </div>
+                        <div class="decision-result-right">
+                            <div class="decision-result-confidence-header">
+                                <span class="decision-result-label">Confidence Score</span>
+                                <span id="confidenceValue" class="confidence-value">0%</span>
+                            </div>
+                            <div id="confidenceMeter" class="confidence-meter">
+                                <div class="confidence-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div id="basicStrategyLine" class="basic-strategy-line"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card lab-card">
+                    <div class="card-title-row">
+                        <h2 class="card-title">Game Simulation</h2>
+                        <button type="button" id="simulate-btn" class="btn-secondary-lab"><i class="fas fa-sync-alt me-1"></i>Run New Simulation</button>
+                    </div>
+                    <div id="simulation-empty" class="simulation-empty">
+                        <span class="simulation-empty-icon"><i class="fas fa-dice"></i></span>
+                        <p>No active simulation data available.</p>
+                    </div>
+                    <div id="simulation-log" class="simulation-log" style="display: none;">
+                        <div id="log-list" class="log-list"></div>
+                        <div class="game-summary">
+                            <div class="summary-scores">Player: <strong id="player-score">—</strong> Dealer: <strong id="dealer-score">—</strong></div>
+                            <span id="game-outcome" class="summary-outcome">—</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content lab-modal">
+                <div class="modal-header border-0">
+                    <h2 class="modal-title" id="aboutModalLabel"><i class="fas fa-info-circle me-2"></i>About This Project</h2>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4 class="modal-heading">What is this?</h4>
+                    <p id="modal-about-description">Loading…</p>
+                    <h5 class="modal-heading mt-4">Motivation</h5>
+                    <p id="modal-about-motivation">Loading…</p>
+                    <h6 class="modal-heading mt-4">Key Features</h6>
+                    <ul id="modal-about-features"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+    <script type="module" src="/main.ts"></script>
+</body>
+
+</html>
